@@ -85,7 +85,7 @@ const refreshAccessToken = async () => {
   try {
     const { user } = useAuthStore.getState();
 
-    if (!user) {
+    if (USE_MOCK_API && !user) {
       return Promise.reject(new Error("Invalid email or password"));
     }
 
@@ -94,14 +94,17 @@ const refreshAccessToken = async () => {
         ? "/admin/refresh-token"
         : AXIOS_CONFIG.REFRESH_TOKEN_ENDPOINT;
 
-    const response = await axios.post(
-      `${import.meta.env.VITE_BACKEND_API_BASE_URL}${refreshEndpoint}`,
-      {},
-      { withCredentials: true, timeout: AXIOS_CONFIG.API_TIMEOUT },
-    );
+    const response = USE_MOCK_API
+      ? await api.post(refreshEndpoint, {})
+      : await axios.post(
+          `${import.meta.env.VITE_BACKEND_API_BASE_URL}${refreshEndpoint}`,
+          {},
+          { withCredentials: true, timeout: AXIOS_CONFIG.API_TIMEOUT },
+        );
 
     const newAccessToken =
-      response.data?.data?.accessToken || response.data?.accessToken;
+      response.data?.data?.accessToken ||
+      response.data?.accessToken;
 
     if (!newAccessToken) {
       throw new Error("Invalid token refresh response structure");

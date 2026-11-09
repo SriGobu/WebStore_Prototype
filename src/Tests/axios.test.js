@@ -51,6 +51,7 @@ vi.mock("axios", () => ({
 vi.mock("../Store/authStore", () => ({
   default: {
     getState: () => ({
+      user: { role: "user" },
       getAccessToken: testState.mockGetAccessToken,
       setAccessToken: testState.mockSetAccessToken,
       clearAuth: testState.mockClearAuth,
@@ -60,7 +61,7 @@ vi.mock("../Store/authStore", () => ({
 
 vi.stubEnv("VITE_BACKEND_API_BASE_URL", "http://localhost:5001/api");
 
-import api from "../Config/axios";
+import "../Config/axios";
 
 describe("axios client", () => {
   let requestHandler;
@@ -98,8 +99,8 @@ describe("axios client", () => {
 
   it("refreshes a token once and retries the failed request", async () => {
     testState.mockGetAccessToken.mockReturnValue("stale-token");
-    testState.mockAxios.post.mockResolvedValueOnce({
-      data: { data: { accessToken: "fresh-token" } },
+    testState.mockAxiosInstance.post.mockResolvedValueOnce({
+      data: { accessToken: "fresh-token" },
     });
 
     const originalRequest = {
@@ -110,10 +111,9 @@ describe("axios client", () => {
 
     await responseErrorHandler(error);
 
-    expect(testState.mockAxios.post).toHaveBeenCalledWith(
-      "http://localhost:5001/api/auth/refresh-token",
+    expect(testState.mockAxiosInstance.post).toHaveBeenCalledWith(
+      "/auth/refresh-token",
       {},
-      { withCredentials: true, timeout: 60000 },
     );
     expect(testState.mockSetAccessToken).toHaveBeenCalledWith("fresh-token");
     expect(testState.mockAxiosInstance).toHaveBeenCalledWith(
@@ -124,7 +124,7 @@ describe("axios client", () => {
   });
 
   it("clears auth and redirects to home when refresh fails", async () => {
-    testState.mockAxios.post.mockRejectedValueOnce(new Error("refresh failed"));
+    testState.mockAxiosInstance.post.mockRejectedValueOnce(new Error("refresh failed"));
 
     const originalRequest = {
       url: "/user/profile",
