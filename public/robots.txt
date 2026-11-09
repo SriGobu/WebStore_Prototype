@@ -1,0 +1,22 @@
+User-agent: *
+
+# Public — allow
+Allow: /
+Allow: /website/
+Allow: /developer/
+
+# Private / gated — disallow
+Disallow: /login
+Disallow: /register
+Disallow: /email-verify
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /profile
+Disallow: /dev
+Disallow: /admin
+Disallow: /admin/login
+
+# Backend API — never meant for crawling
+Disallow: /api/
+
+Sitemap: https://www.webstore.sg247.dev/sitemap.xml
